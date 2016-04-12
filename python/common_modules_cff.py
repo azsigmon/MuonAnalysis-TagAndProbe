@@ -161,6 +161,12 @@ muonDxyPVdzmin = cms.EDProducer("MuonDxyPVdzmin",
 )
 muonDxyPVdzminTags = muonDxyPVdzmin.clone(probes = "tagMuons")
 
+muonImpactParameter = cms.EDProducer("MuonImpactParameter",
+    probes = cms.InputTag("probeMuons"),
+    vertices = cms.InputTag("offlinePrimaryVertices"),
+)
+muonImpactParameterTags = muonImpactParameter.clone(probes = "tagMuons")
+
 jetAwareCleaner = cms.EDProducer("JetAwareCleaner",
   RawJetCollection= cms.InputTag("ak4PFJetsCHS"),
   LeptonCollection= cms.InputTag("probeMuons"),
