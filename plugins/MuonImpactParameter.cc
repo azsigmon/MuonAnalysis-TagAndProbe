@@ -108,18 +108,22 @@ MuonImpactParameter::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   int bestVtx = -1;
   float maxSumPt = 0;
 
-  //vertex loop
-  for(unsigned int iVtx=0; iVtx<primaryVerticesHandle->size(); iVtx++){
+  if(primaryVerticesHandle->size() == 1) {
+    bestVtx = 0;
+  } else {
+    //vertex loop
+    for(unsigned int iVtx=0; iVtx<primaryVerticesHandle->size(); iVtx++){
 
-    float vtxSumPt = 0;
-    for (reco::Vertex::trackRef_iterator it = primaryVerticesHandle->at(iVtx).tracks_begin(); it != primaryVerticesHandle->at(iVtx).tracks_end(); it++) vtxSumPt += (**it).pt();
+      float vtxSumPt = 0;
+      for (reco::Vertex::trackRef_iterator it = primaryVerticesHandle->at(iVtx).tracks_begin(); it != primaryVerticesHandle->at(iVtx).tracks_end(); it++) vtxSumPt += (**it).pt();
 
-    if(vtxSumPt > maxSumPt) {
-      maxSumPt = vtxSumPt;
-      bestVtx = iVtx;
-    }
+      if(vtxSumPt > maxSumPt) {
+        maxSumPt = vtxSumPt;
+        bestVtx = iVtx;
+      }
 
-  } //end of vertex loop
+    } //end of vertex loop
+  }
 
   Handle<View<reco::Muon> > probes;
   iEvent.getByToken(probes_,  probes);

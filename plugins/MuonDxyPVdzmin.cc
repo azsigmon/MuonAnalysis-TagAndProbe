@@ -60,7 +60,7 @@ private:
 //
 MuonDxyPVdzmin::MuonDxyPVdzmin(const edm::ParameterSet& iConfig):
 probes_(consumes<edm::View<reco::Muon>>(iConfig.getParameter<edm::InputTag>("probes"))),
-vertexes_(consumes<std::vector<reco::Vertex>>(edm::InputTag("offlinePrimaryVertices"))),
+vertexes_(consumes<std::vector<reco::Vertex>>(iConfig.getParameter<edm::InputTag>("vertices"))),
 bs_(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot")))
 {
   produces<edm::ValueMap<float> >("dxyBS");

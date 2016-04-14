@@ -158,6 +158,7 @@ muonMiniIsoPhotons = cms.EDProducer("MuonMiniIso",
 
 muonDxyPVdzmin = cms.EDProducer("MuonDxyPVdzmin",
     probes = cms.InputTag("probeMuons"),
+    vertices = cms.InputTag("offlinePrimaryVertices"),
 )
 muonDxyPVdzminTags = muonDxyPVdzmin.clone(probes = "tagMuons")
 
