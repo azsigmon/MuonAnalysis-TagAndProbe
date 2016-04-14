@@ -181,26 +181,10 @@ process.tpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
     addRunLumiInfo = cms.bool(True),
 )
 
-process.load("MuonAnalysis.TagAndProbe.muon.tag_probe_muon_extraIso_cfi")
-process.load("PhysicsTools.PatAlgos.recoLayer0.pfParticleSelectionForIso_cff")
-
-process.miniIsoSeq = cms.Sequence(
-    process.pfParticleSelectionForIsoSequence +
-    process.muonMiniIsoCharged + 
-    process.muonMiniIsoPUCharged + 
-    process.muonMiniIsoNeutrals + 
-    process.muonMiniIsoPhotons 
-)
-
 process.extraProbeVariablesSeq = cms.Sequence(
-    process.probeMuonsIsoSequence +
-    process.computeCorrectedIso + 
     process.splitTrackTagger +
     process.muonDxyPVdzmin + 
-    process.muonImpactParameter +
-    process.miniIsoSeq +
-    process.ak4PFCHSL1FastL2L3CorrectorChain * process.jetAwareCleaner +
-    process.AddPtRatioPtRel
+    process.muonImpactParameter
 )
 
 process.tnpSimpleSequence = cms.Sequence(
@@ -315,15 +299,6 @@ process.tnpSimpleSequenceSta = cms.Sequence(
 )
 
 ## Add extra RECO-level info
-if False:
-    process.tnpSimpleSequenceSta.replace(process.tpTreeSta, process.tkClusterInfo+process.tpTreeSta)
-    process.tpTreeSta.tagVariables.nClustersStrip = cms.InputTag("tkClusterInfo","siStripClusterCount")
-    process.tpTreeSta.tagVariables.nClustersPixel = cms.InputTag("tkClusterInfo","siPixelClusterCount")
-    process.tnpSimpleSequenceSta.replace(process.tpTreeSta, process.tkLogErrors+process.tpTreeSta)
-    process.tpTreeSta.tagVariables.nLogErrFirst = cms.InputTag("tkLogErrors","firstStep")
-    process.tpTreeSta.tagVariables.nLogErrPix   = cms.InputTag("tkLogErrors","pixelSteps")
-    process.tpTreeSta.tagVariables.nLogErrAny   = cms.InputTag("tkLogErrors","anyStep")
-
 if True: 
     process.tracksNoMuonSeeded = cms.EDFilter("TrackSelector",
       src = cms.InputTag("generalTracks"),
@@ -420,4 +395,4 @@ process.schedule = cms.Schedule(
 process.RandomNumberGeneratorService.tkTracksNoZ = cms.PSet( initialSeed = cms.untracked.uint32(81) )
 process.RandomNumberGeneratorService.tkTracksNoZ0 = cms.PSet( initialSeed = cms.untracked.uint32(81) )
 
-process.TFileService = cms.Service("TFileService", fileName = cms.string("tnpZ_Data_pp5TeV_AOD.root"))
+process.TFileService = cms.Service("TFileService", fileName = cms.string("tnpZ_MC_pp5TeV_AOD.root"))
