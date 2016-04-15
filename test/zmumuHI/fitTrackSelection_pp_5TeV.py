@@ -9,12 +9,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 FITFUNC = "BWResCBExp"
 #FITFUNC = "BWResCBCheb"
 
-process.TnP_TrackSelection = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
+process.TnP_TrackSelection_Data = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
     ## Input, output 
     InputFileNames = cms.vstring("file:TnP_Z_pp5TeV_data_trk_v4.root"),
-    #InputFileNames = cms.vstring("file:TnP_Z_pp5TeV_MC_Zmu10mu10_trk_v4.root"),
-    OutputFileName = cms.string(str("fits_pp5TeV_data_TrackSelection1_%s_v1.root" % FITFUNC)),
-    #OutputFileName = cms.string(str("fits_pp5TeV_MC_Zmu10mu10_TrackSelection1_%s_v1.root" % FITFUNC)),
+    OutputFileName = cms.string(str("fits_pp5TeV_data_TrackSelection_%s_v2.root" % FITFUNC)),
     InputTreeName = cms.string("fitter_tree"),
     InputDirectoryName = cms.string("tpTree"),
     # WeightVariable = cms.string("weight"),
@@ -24,8 +22,13 @@ process.TnP_TrackSelection = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
         pt     = cms.vstring("Probe p_{T}", "0", "1000", "GeV/c"),
         eta    = cms.vstring("Probe #eta", "-2.5", "2.5", ""),
         abseta = cms.vstring("Probe |#eta|", "0", "2.5", ""),
+	tkSigmaPtOverPt = cms.vstring("Track pTerror/pT", "0", "30", ""),
+	tkValidHits = cms.vstring("Number of valid hits", "0", "40", ""),
 	tkDxyOverDxyError = cms.vstring("Track Dxy/DxyError", "0", "1000", ""),
 	tkDzOverDzError = cms.vstring("Track Dz/DzError", "0", "10000", ""),
+	tkChi2OverNdofOverNlayer = cms.vstring("chi2/ndof/nLayers", "0", "10", ""),
+	hadEnergy = cms.vstring("Hadronic energy", "0", "600", "GeV"),
+	emEnergy = cms.vstring("Hadronic energy", "0", "300", "GeV"),
     ),
     ## Flags you want to use to define numerator and possibly denominator
     Categories = cms.PSet(
@@ -34,15 +37,26 @@ process.TnP_TrackSelection = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
 	Track_HISel_v2 = cms.vstring("Track selection v2", "dummy[pass=1,fail=0]"),
 	tag_HIL2Mu15 = cms.vstring("HLT_HIL2Mu15", "dummy[pass=1,fail=0]"),
     ),
+    Expressions = cms.PSet(
+	calomatch = cms.vstring("Calo matching", "2*(hadEnergy+emEnergy)/cosh(eta)/pt", "hadEnergy", "emEnergy", "eta", "pt"),
+    ),
     Cuts = cms.PSet(
 	dxy_cut = cms.vstring("dxy/dxyerror < 3", "tkDxyOverDxyError", "3.0"),
 	dz_cut = cms.vstring("dz/dzerror < 3", "tkDzOverDzError", "3.0"),
+	pterr_03cut = cms.vstring("pTerror/pT < 0.3", "tkSigmaPtOverPt", "0.3"),
+	pterr_01cut = cms.vstring("pTerror/pT < 0.1", "tkSigmaPtOverPt", "0.1"),
+	hits_cut = cms.vstring("number of valid hits > 10", "tkValidHits", "10"),
+	chi2_cut = cms.vstring("chi2/ndof/nLayers < 0.15", "tkChi2OverNdofOverNlayer", "0.15"),
+	calomatch_cut = cms.vstring("calomatching < 1", "calomatch", "1.0"),
     ),
     ## What to fit
     Efficiencies = cms.PSet(
         TrackSel_pt = cms.PSet(
             UnbinnedVariables = cms.vstring("mass"),
             EfficiencyCategoryAndState = cms.vstring("Track_HISel_v1", "pass", "dxy_cut", "below", "dz_cut", "below"), ## Numerator definition
+            #EfficiencyCategoryAndState = cms.vstring("Track_HISel_v1", "pass", "dxy_cut", "below", "dz_cut", "below", "calomatch_cut", "below"),
+            #EfficiencyCategoryAndState = cms.vstring("Track_HISel_v2", "pass", "dxy_cut", "below", "dz_cut", "below"),
+            #EfficiencyCategoryAndState = cms.vstring("Track_HISel_v2", "pass", "dxy_cut", "below", "dz_cut", "below", "calomatch_cut", "below"),
             BinnedVariables = cms.PSet(
                 ## Binning in continuous variables
                 eta = cms.vdouble(-1.0, 1.0),
@@ -111,4 +125,8 @@ process.TnP_TrackSelection = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
     SaveWorkspace = cms.bool(True),
 )
 
-process.p = cms.Path(process.TnP_TrackSelection)
+process.TnP_TrackSelection_MC = process.TnP_TrackSelection_Data.clone()
+process.TnP_TrackSelection_MC.InputFileNames = cms.vstring("file:TnP_Z_pp5TeV_MC_Zmu10mu10_trk_v4.root")
+process.TnP_TrackSelection_MC.OutputFileName = cms.string(str("fits_pp5TeV_MC_Zmu10mu10_TrackSelection_%s_v2.root" % FITFUNC))
+
+process.p = cms.Path(process.TnP_TrackSelection_Data + process.TnP_TrackSelection_MC)
